@@ -1,0 +1,23 @@
+from free_energy import stacking_energies
+
+def eS(i, j, RNA_seq, backtrace):
+    size = j - i
+    # find out if (i,j) closes a stacking loop?
+    ext_closing = str(RNA_seq[i]) + str(RNA_seq[j])
+    ext_closing = ''.join(sorted(ext_closing))
+
+    int_clos_i = i + 1
+    int_clos_j = j - 1
+
+    seq_len = len(RNA_seq)
+
+    while ((int_clos_i < seq_len) and (int_clos_j > 0) and backtrace[int_clos_i][int_clos_j] == (-1, 1)):
+        int_clos_i = int_clos_i + 1
+        int_clos_j = int_clos_j - 1
+
+    int_closing = str(RNA_seq[int_clos_i]) + str(RNA_seq[int_clos_j])
+    int_closing = ''.join(sorted(int_closing))
+
+    energy = stacking_energies[ext_closing][int_closing]
+    return energy/10.0    
+
