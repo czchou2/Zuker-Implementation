@@ -8,10 +8,13 @@ bulge_loop_energies = [28, 39, 45, 50, 52, 53, 55, 56, 57, 58, 59, 61, 62, 63, 6
 
 hairpin_loop_energies = {"CG": [float('inf'), float('inf'), 84, 59, 41, 43, 45, 46, 48, 49, 50, 52, 53, 54, 55, 57, 59],
                          "AU" : [float('inf'), float('inf'), 80, 75, 69, 64, 66, 68, 69, 70, 71, 73, 74,75,76,77]}
-# interior_loop_energies = 
+interior_loop_energies = {"CG-CG": [float('inf'), 1, 9, 16, 21, 25, 26, 27, 28, 29, 31, 32, 33, 34, 35, 37, 39], 
+                          "CG-AU":[float('inf'), 10, 18, 25, 30, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 45, 47],
+                          "AU-CG":[float('inf'), 10, 18, 25, 30, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 45, 47],
+                          "AU-AU":[float('inf'), 18, 26, 33, 38, 42, 43, 44, 45, 46, 48, 49, 50, 51, 52, 54, 56]}
 def eH(i,j,S):
     size = j - i - 2
-    if size < 0:
+    if size < 0 or size > 29:
         return float('inf')
     closing = str(S[i]) + str(S[j])
     closing = ''.join(sorted(closing))
@@ -21,7 +24,7 @@ def eL(i,j,ip, jp,S):
     # i paired with j, ip paired with jp inside i and j
     # size does not include the ending pairs
     size = j - i - 4
-    if size < 0:
+    if size < 0 or size > 29:
         return float('inf')
     if(i+1 == ip or j-1 == jp):
         #BULGE
@@ -34,8 +37,11 @@ def eL(i,j,ip, jp,S):
         return (bulge_loop_energies[size] + stacking_energies[closing_ext][closing_int])/10.0
     else:
         #INTERNAL
-        pass
+        closing = ''.join(sorted(str(S[i])+str(S[j]))) + "-" + ''.join(sorted(str(S[ip])+str(S[jp])))
+        return interior_loop_energies[closing][size]/10.0
+
 
 if __name__ == "__main__":
     print(eH(0,3,"AAUU"))
     print(eL(0,4,2,3,"GAAUC")) # example from Salser
+    print(eL(0,5,2,3,"GAAUAC")) 
