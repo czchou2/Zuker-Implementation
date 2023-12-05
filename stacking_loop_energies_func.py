@@ -9,12 +9,6 @@ def eS(i, j, RNA_seq, backtrace):
     int_clos_i = i + 1
     int_clos_j = j - 1
 
-    seq_len = len(RNA_seq)
-
-    while ((int_clos_i < seq_len) and (int_clos_j > 0) and backtrace[int_clos_i][int_clos_j] == (-1, 1)):
-        int_clos_i = int_clos_i + 1
-        int_clos_j = int_clos_j - 1
-
     int_closing = str(RNA_seq[int_clos_i]) + str(RNA_seq[int_clos_j])
     int_closing = ''.join(sorted(int_closing))
 
