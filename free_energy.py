@@ -43,8 +43,7 @@ def eH(i, j, S):
         return float('inf')
     closing = str(S[i]) + str(S[j])
     closing = ''.join(sorted(closing))
-    if closing not in valid_pairs:
-        return float('inf')
+    
     if (not closing in hairpin_loop_energies):
         return float('inf')
     energy = hairpin_loop_energies[closing][size]
@@ -60,24 +59,29 @@ def eL(i, j, ip, jp, S):
     if size < 0 or size > 29:
         return float('inf')
     if (i+1 == ip or j-1 == jp):
+        print('bulge')
         # BULGE
         closing_ext = str(S[i]) + str(S[j])
+        closing_ext = ''.join(sorted(closing_ext))
         if (closing_ext == "UG"):
             closing_ext = "GU"
         closing_int = str(S[ip]) + str(S[jp])
+        closing_int = ''.join(sorted(closing_int))
         if (closing_int == "UG"):
             closing_int = "GU"
 
         if closing_ext not in valid_pairs or closing_int not in valid_pairs:
             return float('inf')
+        
+        
 
-        return (bulge_loop_energies[size] + stacking_energies[closing_ext][closing_int])/10.0
+        return (bulge_loop_energies[size])/10.0
     else:
         # INTERNAL
         closing = ''.join(sorted(str(S[i])+str(S[j]))) + \
             "-" + ''.join(sorted(str(S[ip])+str(S[jp])))
-
-        if closing not in valid_pairs:
+        
+        if (closing not in interior_loop_energies):
             return float('inf')
 
         return interior_loop_energies[closing][size]/10.0
@@ -104,14 +108,19 @@ def eS(i, j, S):
 # TODO: add more tests, test stacking loop
 if __name__ == "__main__":
     # Test hairpin loop
-    assert (eH(0, 3, "AAUU") == float('inf'))
+   
+    assert (eH(0, 3, "AAUU") == 7.5)
 
-    # Test bulge loop
-    assert (eL(0, 4, 2, 3, "GAAUC") == 0.7)  # example from Salser
+    # # Test bulge loop
+    print(eL(0, 4, 2, 3, "GAAUC"))
+    assert (eL(0, 4, 2, 3, "GAAUC") == 2.8)  # example from Salser
 
     # Test interior loop
     assert (eL(0, 5, 2, 3, "GAAUAC") == 1)
 
-    print(len(hairpin_loop_energies["CG"]))
-    print(len(hairpin_loop_energies["AU"]))
-    print(len(interior_loop_energies["AU-AU"]))
+    # print(len(hairpin_loop_energies["CG"]))
+    # print(len(hairpin_loop_energies["AU"]))
+    # print(len(interior_loop_energies["AU-AU"]))
+
+    # stacking_score = eS(0, 3,"GAUG")
+    # print(stacking_score)
