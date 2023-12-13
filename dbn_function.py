@@ -1,4 +1,5 @@
 import sys
+# moved to zuker.py
 def dbn_output(name,dbn,rna,dbn_file):
     f = open(dbn_file,"w")
     f.write("#Name: "+name + "\n")

@@ -1,5 +1,5 @@
 from free_energy import stacking_energies
-
+# moved to free_energy.py
 def eS(i, j, RNA_seq, backtrace):
     size = j - i
     # find out if (i,j) closes a stacking loop?

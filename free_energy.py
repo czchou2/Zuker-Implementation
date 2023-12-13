@@ -14,6 +14,10 @@ interior_loop_energies = {"CG-CG": [float('inf'), 1, 9, 16, 21, 25, 26, 27, 28, 
                           "AU-CG":[float('inf'), 10, 18, 25, 30, 34, 35, 36, 37, 38,38, 39,39, 40,40, 41,41, 42,42, 43,43,43,44,44, 45,45,45,46,46, 47],
                           "AU-AU":[float('inf'), 18, 26, 33, 38, 42, 43, 44, 45, 46,47, 48,48, 49,49, 50,50, 51,51, 52,52,52,53,53, 54,54,54,55,55, 56]}
 def eH(i,j,S):
+    '''
+    input: start and end position, sequence
+    output: energy of hairpin loop from sequence i..j
+    '''
     size = j - i - 2
     if size < 0 or size > 29:
         return float('inf')
@@ -22,6 +26,10 @@ def eH(i,j,S):
     energy = hairpin_loop_energies[closing][size]
     return energy/10.0 # energy is in tenths of kcal/mole
 def eL(i,j,ip, jp,S):
+    '''
+    input: exterior closing pair (i,j), interior closing pair (ip,jp), sequence
+    output: energy of bulge or interior loop
+    '''
     # i paired with j, ip paired with jp inside i and j
     # size does not include the ending pairs
     size = j - i - 4
@@ -41,6 +49,24 @@ def eL(i,j,ip, jp,S):
         closing = ''.join(sorted(str(S[i])+str(S[j]))) + "-" + ''.join(sorted(str(S[ip])+str(S[jp])))
         return interior_loop_energies[closing][size]/10.0
 
+def eS(i, j, RNA_seq, backtrace=None):
+    '''
+    input: start and end position, sequence
+    output: energy of stacking loop from sequence i..j
+    '''
+    size = j - i
+    # find out if (i,j) closes a stacking loop?
+    ext_closing = str(RNA_seq[i]) + str(RNA_seq[j])
+    ext_closing = ''.join(sorted(ext_closing))
+
+    int_clos_i = i + 1
+    int_clos_j = j - 1
+
+    int_closing = str(RNA_seq[int_clos_i]) + str(RNA_seq[int_clos_j])
+    int_closing = ''.join(sorted(int_closing))
+
+    energy = stacking_energies[ext_closing][int_closing]
+    return energy/10.0 
 
 if __name__ == "__main__":
     print(eH(0,3,"AAUU"))

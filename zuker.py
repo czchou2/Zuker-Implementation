@@ -1,3 +1,4 @@
+from free_energy import *
 seq = ""
 
 
@@ -14,30 +15,17 @@ def parse(filename):
         file.close()
     return seq
 
-
-def eH(i, j):
+def dbn_output(name,dbn,rna,dbn_file):
     '''
-    input: start and end position
-    output: energy of hairpin loop from sequence i..j
+    input: name string, dot-bracket string, sequence string, file path
     '''
-    pass
-
-
-def eS(i, j):
-    '''
-    input: start and end position
-    output: energy of stacking loop from sequence i..j
-    '''
-    pass
-
-
-def eL(i, j, i_prime, j_prime):
-    '''
-    input:
-    output:
-    '''
-    pass
-
+    f = open(dbn_file,"w")
+    f.write("#Name: "+name + "\n")
+    f.write("#Length: "+str(len(rna)) +"\n")
+    f.write("#PageNumber: NA\n")
+    f.write(rna + "\n")
+    f.write(dbn)
+    f.close()
 
 def a(i, j):
     '''
@@ -81,8 +69,8 @@ def dp(seq):
             w[i][j] = min(w[i][j-1], temp)
             bt[i][j] = 
 
-            eq1 = min(eH(i, j), v[i+1][j-1] + eS(i, j))
-            eq2 = min([v[i_prime][j_prime] + eL(i, j, i_prime, j_prime)
+            eq1 = min(eH(i, j, seq), v[i+1][j-1] + eS(i, j, seq))
+            eq2 = min([v[i_prime][j_prime] + eL(i, j, i_prime, j_prime, seq)
                        for i_prime in range(i+1, j)
                        for j_prime in range(i_prime+1, j)])
             eq3 = min([wm[i+1][k] + wm[k+1][j-1] + a(i, j)
