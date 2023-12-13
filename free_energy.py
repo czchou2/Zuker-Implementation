@@ -38,12 +38,14 @@ valid_pairs = {"AU", "CG"}
 
 def eH(i, j, S):
     """Calculates the energy of a hairpin loop from S[i..j]."""
-    size = j - i - 2
+    size = j - i
     if size < 0 or size > 29:
         return float('inf')
     closing = str(S[i]) + str(S[j])
     closing = ''.join(sorted(closing))
     if closing not in valid_pairs:
+        return float('inf')
+    if (not closing in hairpin_loop_energies):
         return float('inf')
     energy = hairpin_loop_energies[closing][size]
     return energy/10.0
@@ -54,7 +56,7 @@ def eL(i, j, ip, jp, S):
     where (i,j) is the exterior closing pair and (i',j') is the interior closing pair."""
     # i paired with j, ip paired with jp inside i and j
     # size does not include the ending pairs
-    size = j - i - 4
+    size = ip - i + j - jp - 3
     if size < 0 or size > 29:
         return float('inf')
     if (i+1 == ip or j-1 == jp):
@@ -93,10 +95,8 @@ def eS(i, j, S):
 
     int_closing = str(S[int_clos_i]) + str(S[int_clos_j])
     int_closing = ''.join(sorted(int_closing))
-
-    if ext_closing not in valid_pairs or int_closing not in valid_pairs:
+    if (not(ext_closing in stacking_energies) or not(int_closing in stacking_energies[ext_closing])):
         return float('inf')
-
     energy = stacking_energies[ext_closing][int_closing]
     return energy/10.0
 
