@@ -33,6 +33,8 @@ interior_loop_energies = {"CG-CG": [float('inf'), 1, 9, 16, 21, 25, 26, 27, 28, 
                           "AU-CG": [float('inf'), 10, 18, 25, 30, 34, 35, 36, 37, 38, 38, 39, 39, 40, 40, 41, 41, 42, 42, 43, 43, 43, 44, 44, 45, 45, 45, 46, 46, 47],
                           "AU-AU": [float('inf'), 18, 26, 33, 38, 42, 43, 44, 45, 46, 47, 48, 48, 49, 49, 50, 50, 51, 51, 52, 52, 52, 53, 53, 54, 54, 54, 55, 55, 56]}
 
+valid_pairs = {"AU", "CG"}
+
 
 def eH(i, j, S):
     """Calculates the energy of a hairpin loop from S[i..j]."""
@@ -41,6 +43,8 @@ def eH(i, j, S):
         return float('inf')
     closing = str(S[i]) + str(S[j])
     closing = ''.join(sorted(closing))
+    if closing not in valid_pairs:
+        return float('inf')
     energy = hairpin_loop_energies[closing][size]
     return energy/10.0
 
@@ -61,26 +65,37 @@ def eL(i, j, ip, jp, S):
         closing_int = str(S[ip]) + str(S[jp])
         if (closing_int == "UG"):
             closing_int = "GU"
+
+        if closing_ext not in valid_pairs or closing_int not in valid_pairs:
+            return float('inf')
+
         return (bulge_loop_energies[size] + stacking_energies[closing_ext][closing_int])/10.0
     else:
         # INTERNAL
         closing = ''.join(sorted(str(S[i])+str(S[j]))) + \
             "-" + ''.join(sorted(str(S[ip])+str(S[jp])))
+
+        if closing not in valid_pairs:
+            return float('inf')
+
         return interior_loop_energies[closing][size]/10.0
 
 
-def eS(i, j, RNA_seq, backtrace=None):
+def eS(i, j, S):
     """Calculates the energy of a stacking loop from S[i..j]."""
     size = j - i
     # find out if (i,j) closes a stacking loop?
-    ext_closing = str(RNA_seq[i]) + str(RNA_seq[j])
+    ext_closing = str(S[i]) + str(S[j])
     ext_closing = ''.join(sorted(ext_closing))
 
     int_clos_i = i + 1
     int_clos_j = j - 1
 
-    int_closing = str(RNA_seq[int_clos_i]) + str(RNA_seq[int_clos_j])
+    int_closing = str(S[int_clos_i]) + str(S[int_clos_j])
     int_closing = ''.join(sorted(int_closing))
+
+    if ext_closing not in valid_pairs or int_closing not in valid_pairs:
+        return float('inf')
 
     energy = stacking_energies[ext_closing][int_closing]
     return energy/10.0
