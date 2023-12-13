@@ -1,5 +1,6 @@
 from free_energy import eH, eS, eL
 # import sys
+import timeit
 
 
 def parse(filename):
@@ -63,6 +64,9 @@ def zuker(S):
     # for i < j - m
     for i in range(n):
         for j in range(n):
+            if i >= j - m:
+                continue
+
             # Recursion equation for W
             eq0 = min([W[i][k-1] + V[k][j]
                        for k in range(i, j-m)])
