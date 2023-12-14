@@ -1,5 +1,6 @@
 from free_energy import eH, eS, eL
 import sys
+import argparse
 import timeit
 
 
@@ -55,10 +56,6 @@ def zuker(S):
     # minimal energy of true part of a multi-loop i...j
     WM = [[float("inf") for _ in range(n)] for _ in range(n)]
 
-    # Wbt = [[None for _ in range(n)] for _ in range(n)]
-    # Vbt = [[None for _ in range(n)] for _ in range(n)]
-    # WMbt = [[None for _ in range(n)] for _ in range(n)]
-    # moves = {"W1","W2"}
     # initialization:
     # for j - i <= m, W(i,j)=0, V(i,j)=inf, WM(i,j)=inf
 
@@ -90,9 +87,6 @@ def zuker(S):
     for j in range(n):
         for i in reversed(range(j-m)):
             # Recursion equation for W
-            # eq0 = min([W[i][k-1] + V[k][j]
-            #            for k in range(i, j-m)])
-
             eq0 = min([W[i][k-1] + V[k][j] if k>0 else V[k][j] for k in range(i,j-m)])
             # corresponds to j unpaired, j paired
             W[i][j] = min([W[i][j-1], eq0])
@@ -103,6 +97,10 @@ def zuker(S):
 
 # x = 0 (W), 1 (V), WM (2)
 def backtrace(i, j, W, V, WM, x,dbn,S):
+    '''
+    input: i index, j index, W matrix, V matrix, WM matrix, x (matrix recursing on), dbn (dot bracket to be modified), S rna sequence
+    output: dbn with pairs added
+    '''
     # temp
     m = 3
     a = 0
@@ -138,7 +136,6 @@ def backtrace(i, j, W, V, WM, x,dbn,S):
                 if V[i][j] == score:
                     # interior loop or bulge
                     dbn = dbn[:i] + "(" + dbn[i+1:j] + ")" + dbn[j+1:]
-                    # dbn = dbn[:ip] + "(" + dbn[ip+1:jp] + ")" + dbn[jp+1:] # V will always add closing pair at i,j
                     dbn = backtrace(ip, jp, W, V, WM, 1,dbn,S)
                 else:
                     # multiloop
@@ -170,21 +167,33 @@ def backtrace(i, j, W, V, WM, x,dbn,S):
     return dbn
 
 
-def main(ff,dbnf):
+def main(ff,dbnf,lim):
     # file = "bpRNA_CRW_296.fasta"
     seq = parse(ff)
 
-    print(len(seq))
+    if(lim > -1):
+        print("limiting length to",lim,"...")
+        S = seq[:lim]
+    else:
+        S = seq
 
-    S = seq[:150]
     starttime = timeit.default_timer()
+
     W, V, WM = zuker(S)
-    print(W[0][len(S)-1], timeit.default_timer() - starttime)
+    print("Minimum energy score:",W[0][len(S)-1],"\nTime:", timeit.default_timer() - starttime)
     dbn = "-" * len(S)
     dbn = backtrace(0, len(S)-1, W, V, WM, 0,dbn,S)
     dbn_output("test",dbn,S,dbnf)
 
 if __name__ == "__main__":
-    fasta_file = sys.argv[1]
-    dbn_file = sys.argv[2]
-    main(fasta_file,dbn_file)
+    # fasta_file = sys.argv[1]
+    # dbn_file = sys.argv[2]
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-f", "--fasta", help="fasta file", required=True)
+    parser.add_argument("-d", "--dbn", help="dbn file", required=True)
+    parser.add_argument("-l", "--limit", help="limit length of sequence", default=-1, type=int)
+    args = parser.parse_args()
+    fasta_file = args.fasta
+    dbn_file = args.dbn
+    limit = args.limit
+    main(fasta_file,dbn_file,limit)
