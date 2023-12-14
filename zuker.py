@@ -71,8 +71,8 @@ def zuker(S):
             # multi-loop
             eq1 = min(eH(i, j, S), V[i+1][j-1] + eS(i, j, S))
             eq2 = min([V[ip][jp] + eL(i, j, ip, jp, S)
-                       for ip in range(i+1, j)
-                       for jp in range(ip+1, j)])
+                       for ip in range(i+1, min(j,i+34))
+                       for jp in range(max(ip+1,j-34), j)])
             eq3 = min([WM[i+1][k] + WM[k+1][j-1] + a
                       for k in range(i+1, j)])
             V[i][j] = min(eq1, eq2, eq3)
