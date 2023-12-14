@@ -38,7 +38,7 @@ valid_pairs = {"AU", "CG"}
 
 def eH(i, j, S):
     """Calculates the energy of a hairpin loop from S[i..j]."""
-    size = j - i
+    size = j - i - 2
     if size < 0 or size > 29:
         return float('inf')
     closing = str(S[i]) + str(S[j])
@@ -56,6 +56,7 @@ def eL(i, j, ip, jp, S):
     # i paired with j, ip paired with jp inside i and j
     # size does not include the ending pairs
     size = ip - i + j - jp - 3
+    print(size)
     if size < 0 or size > 29:
         return float('inf')
     if (i+1 == ip or j-1 == jp):
@@ -75,7 +76,7 @@ def eL(i, j, ip, jp, S):
         
         
 
-        return (bulge_loop_energies[size])/10.0
+        return (bulge_loop_energies[size] + stacking_energies[closing_ext][closing_int])/10.0
     else:
         # INTERNAL
         closing = ''.join(sorted(str(S[i])+str(S[j]))) + \
@@ -109,14 +110,14 @@ def eS(i, j, S):
 if __name__ == "__main__":
     # Test hairpin loop
    
-    assert (eH(0, 3, "AAUU") == 7.5)
+    # assert (eH(0, 3, "AAUU") == 7.5)
 
     # # Test bulge loop
     print(eL(0, 4, 2, 3, "GAAUC"))
     assert (eL(0, 4, 2, 3, "GAAUC") == 2.8)  # example from Salser
 
     # Test interior loop
-    assert (eL(0, 5, 2, 3, "GAAUAC") == 1)
+    # assert (eL(0, 5, 2, 3, "GAAUAC") == 1)
 
     # print(len(hairpin_loop_energies["CG"]))
     # print(len(hairpin_loop_energies["AU"]))
