@@ -42,8 +42,8 @@ def zuker(S):
 
     # TODO:
     a = 0  # energy contribution for closing of loop
-    b = 0
-    c = 0
+    b = 0 # energy contribution for paired base (secondary structure) in multiloop
+    c = 0 # energy contribution for unpaired base in multiloop
 
     # minimal loop size (slide 7)
     m = 3
@@ -176,7 +176,7 @@ def main():
 
     print(len(seq))
 
-    S = seq[:100]
+    S = seq[:150]
     starttime = timeit.default_timer()
     W, V, WM = zuker(S)
     print(W[0][len(S)-1], timeit.default_timer() - starttime)
