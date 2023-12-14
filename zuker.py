@@ -60,16 +60,12 @@ def zuker(S):
 
     # recursion:
     # for i < j - m
-    for i in range(n):
-        for j in range(n):
-            if i >= j - m:
-                continue
 
-            # Recursion equation for W
-            eq0 = min([W[i][k-1] + V[k][j]
-                       for k in range(i, j-m)])
-            # corresponds to j unpaired, j paired
-            W[i][j] = min(W[i][j-1], eq0)
+
+    for j in range(n):
+        for i in reversed(range(j-m)):
+            # if i >= j - m:
+            #     continue
 
             # Recursion equation for V
             # corresponds to:
@@ -83,6 +79,14 @@ def zuker(S):
             eq3 = min([WM[i+1][k] + WM[k+1][j-1] + a
                       for k in range(i+1, j)])
             V[i][j] = min(eq1, eq2, eq3)
+
+            # Recursion equation for W
+            eq0 = min([W[i][k-1] + V[k][j]
+                       for k in range(i, j-m)])
+            # corresponds to j unpaired, j paired
+            W[i][j] = min(W[i][j-1], eq0)
+
+            
 
             # Recursion equation for WM
             # corresponds to:
@@ -153,16 +157,16 @@ def backtrace(i, j, W, V, WM, x):
                     
 
         # backtrack matrix WM
-        else:
-            if WM[i][j] == WM[i][j-1] + c:
-                # j unpaired
-            elif WM[i][j] == WM[i+1][j] + c:
-                # i unpaired
-            elif WM[i][j] == V[i][j] + b:
-                # closed
-            else:
-                # unclosed
-                # backtrace
+        # else:
+        #     if WM[i][j] == WM[i][j-1] + c:
+        #         # j unpaired
+        #     elif WM[i][j] == WM[i+1][j] + c:
+        #         # i unpaired
+        #     elif WM[i][j] == V[i][j] + b:
+        #         # closed
+        #     else:
+        #         # unclosed
+        #         # backtrace
 
     return P
 
@@ -188,4 +192,11 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    file = "bpRNA_CRW_296.fasta"
+    seq = parse(file)
+    test_seq = 'CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAG'
+    W,V, WM = zuker(test_seq)
+    # seq = 'CAAAAAAAAG'
+    # W, V, WM = zuker(seq)
+    print(W[0][len(test_seq) - 1])
+    print(W)
