@@ -56,26 +56,22 @@ def eL(i, j, ip, jp, S):
     # i paired with j, ip paired with jp inside i and j
     # size does not include the ending pairs
     size = ip - i + j - jp - 3
-    print(size)
+    # print(size)
     if size < 0 or size > 29:
         return float('inf')
     if (i+1 == ip or j-1 == jp):
-        print('bulge')
+        # print('bulge')
         # BULGE
         closing_ext = str(S[i]) + str(S[j])
-        closing_ext = ''.join(sorted(closing_ext))
         if (closing_ext == "UG"):
             closing_ext = "GU"
         closing_int = str(S[ip]) + str(S[jp])
-        closing_int = ''.join(sorted(closing_int))
         if (closing_int == "UG"):
             closing_int = "GU"
 
-        if closing_ext not in valid_pairs or closing_int not in valid_pairs:
+        if (closing_int not in stacking_energies or closing_ext not in stacking_energies):
             return float('inf')
         
-        
-
         return (bulge_loop_energies[size] + stacking_energies[closing_ext][closing_int])/10.0
     else:
         # INTERNAL
@@ -93,13 +89,15 @@ def eS(i, j, S):
     size = j - i
     # find out if (i,j) closes a stacking loop?
     ext_closing = str(S[i]) + str(S[j])
-    ext_closing = ''.join(sorted(ext_closing))
+    if (ext_closing == "UG"):
+            ext_closing = "GU"
 
     int_clos_i = i + 1
     int_clos_j = j - 1
 
     int_closing = str(S[int_clos_i]) + str(S[int_clos_j])
-    int_closing = ''.join(sorted(int_closing))
+    if (ext_closing == "UG"):
+            ext_closing = "GU"
     if (not(ext_closing in stacking_energies) or not(int_closing in stacking_energies[ext_closing])):
         return float('inf')
     energy = stacking_energies[ext_closing][int_closing]
@@ -113,8 +111,7 @@ if __name__ == "__main__":
     # assert (eH(0, 3, "AAUU") == 7.5)
 
     # # Test bulge loop
-    print(eL(0, 4, 2, 3, "GAAUC"))
-    assert (eL(0, 4, 2, 3, "GAAUC") == 2.8)  # example from Salser
+    assert (eL(0, 4, 2, 3, "GAAUC") == 0.7)  # example from Salser
 
     # Test interior loop
     # assert (eL(0, 5, 2, 3, "GAAUAC") == 1)

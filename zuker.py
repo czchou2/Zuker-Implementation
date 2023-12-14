@@ -96,75 +96,75 @@ def zuker(S):
 
 
 # x = 0 (W), 1 (V), WM (2)
-def backtrace(i, j, W, V, WM, x):
-    # temp
-    m = 3
-    a = 0
-    b = 0
-    c = 0
+# def backtrace(i, j, W, V, WM, x):
+#     # temp
+#     m = 3
+#     a = 0
+#     b = 0
+#     c = 0
 
-    i = 1
-    j = len(W)
-    P = []
-    while j > 1:
+#     i = 1
+#     j = len(W)
+#     P = []
+#     while j > 1:
 
-        # backtrack matrix W
-        if x == 0:
-            if W[i][j] == W[i][j-1]:
-                # j unpaired
-                j -= 1
-                continue
+#         # backtrack matrix W
+#         if x == 0:
+#             if W[i][j] == W[i][j-1]:
+#                 # j unpaired
+#                 j -= 1
+#                 continue
 
-            score, k = min([(W[i][k-1] + V[k][j], k)
-                            for k in range(i, j-m)])
-            if W[i][j] == score:
-                # j paired
-                backtrace(i, k-1, W, V, WM, 0)
+#             score, k = min([(W[i][k-1] + V[k][j], k)
+#                             for k in range(i, j-m)])
+#             if W[i][j] == score:
+#                 # j paired
+#                 backtrace(i, k-1, W, V, WM, 0)
 
-                backtrace(k, j, W, V, WM, 1)
-                # P.append((j, k))
+#                 backtrace(k, j, W, V, WM, 1)
+#                 # P.append((j, k))
 
-        # backrack matrix V
-        elif x == 1:
-            if V[i][j] == eH(i, j):
-                # hairpin loop
-                # done?
-                return
-            elif V[i][j] == V[i+1][j-1] + eS(i, j):
-                # stacking loop
-                i += 1
-                j -= 1
-            else:
-                score, ip, jp = min([(V[ip][jp] + eL(i, j, ip, jp, S), ip, jp)
-                       for ip in range(i+1, j)
-                       for jp in range(ip+1, j)])
-                if V[i][j] == score:
-                    # interior loop or bulge
-                    backtrace(ip, jp, W, V, WM, 1)
-                    # append P?
+#         # backrack matrix V
+#         elif x == 1:
+#             if V[i][j] == eH(i, j):
+#                 # hairpin loop
+#                 # done?
+#                 return
+#             elif V[i][j] == V[i+1][j-1] + eS(i, j):
+#                 # stacking loop
+#                 i += 1
+#                 j -= 1
+#             else:
+#                 score, ip, jp = min([(V[ip][jp] + eL(i, j, ip, jp, S), ip, jp)
+#                        for ip in range(i+1, j)
+#                        for jp in range(ip+1, j)])
+#                 if V[i][j] == score:
+#                     # interior loop or bulge
+#                     backtrace(ip, jp, W, V, WM, 1)
+#                     # append P?
 
-                else:
-                    # multiloop
-                    score, k = min([(WM[i+1][k] + WM[k+1][j-1] + a, k)
-                      for k in range(i+1, j)])
-                    backtrace(i+1, k, W, V, WM, 2)
-                    backtrace(k+1, j-1, W, V, WM, 2)
-                    # append P?
+#                 else:
+#                     # multiloop
+#                     score, k = min([(WM[i+1][k] + WM[k+1][j-1] + a, k)
+#                       for k in range(i+1, j)])
+#                     backtrace(i+1, k, W, V, WM, 2)
+#                     backtrace(k+1, j-1, W, V, WM, 2)
+#                     # append P?
                     
 
-        # backtrack matrix WM
-        else:
-            if WM[i][j] == WM[i][j-1] + c:
-                # j unpaired
-            elif WM[i][j] == WM[i+1][j] + c:
-                # i unpaired
-            elif WM[i][j] == V[i][j] + b:
-                # closed
-            else:
-                # unclosed
-                # backtrace
+#         # backtrack matrix WM
+#         else:
+#             if WM[i][j] == WM[i][j-1] + c:
+#                 # j unpaired
+#             elif WM[i][j] == WM[i+1][j] + c:
+#                 # i unpaired
+#             elif WM[i][j] == V[i][j] + b:
+#                 # closed
+#             else:
+#                 # unclosed
+#                 # backtrace
 
-    return P
+#     return P
 
 
 def main():
@@ -178,7 +178,7 @@ def main():
     W, V, WM = zuker(S)
     print(W[0][len(S)-1], timeit.default_timer() - starttime)
 
-    structure = backtrace(0, len(S)-1, W, V, WM, 0)
+    # structure = backtrace(0, len(S)-1, W, V, WM, 0)
     # print(structure)
 
     # dbn_file = sys.argv[1]
