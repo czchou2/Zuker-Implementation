@@ -1,5 +1,5 @@
 from free_energy import eH, eS, eL
-# import sys
+import sys
 import timeit
 
 
@@ -170,9 +170,9 @@ def backtrace(i, j, W, V, WM, x,dbn,S):
     return dbn
 
 
-def main():
-    file = "bpRNA_CRW_296.fasta"
-    seq = parse(file)
+def main(ff,dbnf):
+    # file = "bpRNA_CRW_296.fasta"
+    seq = parse(ff)
 
     print(len(seq))
 
@@ -182,21 +182,9 @@ def main():
     print(W[0][len(S)-1], timeit.default_timer() - starttime)
     dbn = "-" * len(S)
     dbn = backtrace(0, len(S)-1, W, V, WM, 0,dbn,S)
-    print(dbn)
-
-    # dbn_file = sys.argv[1]
-    # dbn = "((..))"
-    # rna = "AAGATT"
-    # dbn_output("test",dbn,rna,dbn_file)
-
+    dbn_output("test",dbn,S,dbnf)
 
 if __name__ == "__main__":
-    main()
-    # file = "bpRNA_CRW_296.fasta"
-    # seq = parse(file)
-    # test_seq = 'CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAG'
-    # W,V, WM = zuker(test_seq)
-    # seq = 'CAAAAAAAAG'
-    # W, V, WM = zuker(seq)
-    # print(W[0][len(test_seq) - 1])
-    # print(W)
+    fasta_file = sys.argv[1]
+    dbn_file = sys.argv[2]
+    main(fasta_file,dbn_file)
