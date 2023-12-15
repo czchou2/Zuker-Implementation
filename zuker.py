@@ -1,5 +1,6 @@
 from free_energy import eH, eS, eL
-# import sys
+import sys
+import argparse
 import timeit
 
 
@@ -42,8 +43,8 @@ def zuker(S):
 
     # TODO:
     a = 0  # energy contribution for closing of loop
-    b = 0
-    c = 0
+    b = 0 # energy contribution for paired base (secondary structure) in multiloop
+    c = 0 # energy contribution for unpaired base in multiloop
 
     # minimal loop size (slide 7)
     m = 3
@@ -60,16 +61,8 @@ def zuker(S):
 
     # recursion:
     # for i < j - m
-    for i in range(n):
-        for j in range(n):
-            if i >= j - m:
-                continue
-
-            # Recursion equation for W
-            eq0 = min([W[i][k-1] + V[k][j]
-                       for k in range(i, j-m)])
-            # corresponds to j unpaired, j paired
-            W[i][j] = min(W[i][j-1], eq0)
+    for j in range(n):
+        for i in reversed(range(j-m)):
 
             # Recursion equation for V
             # corresponds to:
@@ -78,12 +71,11 @@ def zuker(S):
             # multi-loop
             eq1 = min(eH(i, j, S), V[i+1][j-1] + eS(i, j, S))
             eq2 = min([V[ip][jp] + eL(i, j, ip, jp, S)
-                       for ip in range(i+1, j)
-                       for jp in range(ip+1, j)])
+                       for ip in range(i+1, min(j,i+34))
+                       for jp in range(max(ip+1,j-34), j)])
             eq3 = min([WM[i+1][k] + WM[k+1][j-1] + a
                       for k in range(i+1, j)])
             V[i][j] = min(eq1, eq2, eq3)
-
             # Recursion equation for WM
             # corresponds to:
             # j unpaired, i unpaired, closed
@@ -92,100 +84,116 @@ def zuker(S):
             eq5 = min([WM[i][k] + WM[k+1][j] for k in range(i+1, j)])
             WM[i][j] = min(eq4, eq5)
 
+    for j in range(n):
+        for i in reversed(range(j-m)):
+            # Recursion equation for W
+            eq0 = min([W[i][k-1] + V[k][j] if k>0 else V[k][j] for k in range(i,j-m)])
+            # corresponds to j unpaired, j paired
+            W[i][j] = min([W[i][j-1], eq0])
+
     return W, V, WM
 
 
+
 # x = 0 (W), 1 (V), WM (2)
-# def backtrace(i, j, W, V, WM, x):
-#     # temp
-#     m = 3
-#     a = 0
-#     b = 0
-#     c = 0
+def backtrace(i, j, W, V, WM, x,dbn,S):
+    '''
+    input: i index, j index, W matrix, V matrix, WM matrix, x (matrix recursing on), dbn (dot bracket to be modified), S rna sequence
+    output: dbn with pairs added
+    '''
+    # temp
+    m = 3
+    a = 0
+    b = 0
+    c = 0
 
-#     i = 1
-#     j = len(W)
-#     P = []
-#     while j > 1:
+    if j - m > i: 
+        # backtrack matrix W
+        if x == 0:
+            if W[i][j] == W[i][j-1]:
+                # j unpaired
+                dbn = backtrace(i, j-1, W, V, WM, 0,dbn,S)
+            else:
+                score, k = min([(W[i][k-1] + V[k][j],k) if k>0 else (V[k][j],k) for k in range(i,j-m)])
 
-#         # backtrack matrix W
-#         if x == 0:
-#             if W[i][j] == W[i][j-1]:
-#                 # j unpaired
-#                 j -= 1
-#                 continue
+                if W[i][j] == score:
+                    # j paired
+                    dbn = backtrace(i, k-1, W, V, WM, 0,dbn,S)
+                    dbn = backtrace(k, j, W, V, WM, 1,dbn,S)
+        # backrack matrix V
+        elif x == 1:
+            if V[i][j] == eH(i, j,S):
+                # hairpin loop
+                dbn = dbn[:i] + "(" + dbn[i+1:j] + ")" + dbn[j+1:]
+            elif V[i][j] == V[i+1][j-1] + eS(i, j, S):
+                # stacking loop
+                dbn = dbn[:i] + "(" + dbn[i+1:j] + ")" + dbn[j+1:]
+                dbn = backtrace(i+1, j-1, W, V, WM, 1,dbn,S)
+            else:
+                score, ip, jp = min([(V[ip][jp] + eL(i, j, ip, jp, S), ip, jp)
+                       for ip in range(i+1, j)
+                       for jp in range(ip+1, j)])
+                if V[i][j] == score:
+                    # interior loop or bulge
+                    dbn = dbn[:i] + "(" + dbn[i+1:j] + ")" + dbn[j+1:]
+                    dbn = backtrace(ip, jp, W, V, WM, 1,dbn,S)
+                else:
+                    # multiloop
+                    score, k = min([(WM[i+1][k] + WM[k+1][j-1] + a, k)
+                      for k in range(i+1, j)])
+                    dbn = dbn[:i] + "(" + dbn[i+1:j] + ")" + dbn[j+1:]
+                    dbn = backtrace(i+1, k, W, V, WM, 2,dbn,S)
+                    dbn = backtrace(k+1, j-1, W, V, WM, 2,dbn,S)
 
-#             score, k = min([(W[i][k-1] + V[k][j], k)
-#                             for k in range(i, j-m)])
-#             if W[i][j] == score:
-#                 # j paired
-#                 backtrace(i, k-1, W, V, WM, 0)
+        # backtrack matrix WM
+        else:
+            if WM[i][j] == WM[i][j-1] + c:
+                # j unpaired
+                dbn = backtrace(i, j-1, W, V, WM, 2,dbn,S)
+            elif WM[i][j] == WM[i+1][j] + c:
+                # i unpaired
+                dbn = backtrace(i+1, j, W, V, WM, 2,dbn,S)
+            elif WM[i][j] == V[i][j] + b:
+                # closed
+                dbn = backtrace(i,j,W,V,WM,1,dbn,S)
+            else:
+                # unclosed
+                score, k = min([(WM[i][k] + WM[k+1][j], k)
+                      for k in range(i+1, j)])
+                dbn = backtrace(i,k,W,V,WM,2,dbn,S)
+                dbn = backtrace(k+1,j,W,V,WM,2,dbn,S)
 
-#                 backtrace(k, j, W, V, WM, 1)
-#                 # P.append((j, k))
-
-#         # backrack matrix V
-#         elif x == 1:
-#             if V[i][j] == eH(i, j):
-#                 # hairpin loop
-#                 # done?
-#                 return
-#             elif V[i][j] == V[i+1][j-1] + eS(i, j):
-#                 # stacking loop
-#                 i += 1
-#                 j -= 1
-#             else:
-#                 score, ip, jp = min([(V[ip][jp] + eL(i, j, ip, jp, S), ip, jp)
-#                        for ip in range(i+1, j)
-#                        for jp in range(ip+1, j)])
-#                 if V[i][j] == score:
-#                     # interior loop or bulge
-#                     backtrace(ip, jp, W, V, WM, 1)
-#                     # append P?
-
-#                 else:
-#                     # multiloop
-#                     score, k = min([(WM[i+1][k] + WM[k+1][j-1] + a, k)
-#                       for k in range(i+1, j)])
-#                     backtrace(i+1, k, W, V, WM, 2)
-#                     backtrace(k+1, j-1, W, V, WM, 2)
-#                     # append P?
-                    
-
-#         # backtrack matrix WM
-#         else:
-#             if WM[i][j] == WM[i][j-1] + c:
-#                 # j unpaired
-#             elif WM[i][j] == WM[i+1][j] + c:
-#                 # i unpaired
-#             elif WM[i][j] == V[i][j] + b:
-#                 # closed
-#             else:
-#                 # unclosed
-#                 # backtrace
-
-#     return P
+                
+    return dbn
 
 
-def main():
-    file = "bpRNA_CRW_296.fasta"
-    seq = parse(file)
+def main(ff,dbnf,lim):
+    # file = "bpRNA_CRW_296.fasta"
+    seq = parse(ff)
 
-    print(len(seq))
+    if(lim > -1):
+        print("limiting length to",lim,"...")
+        S = seq[:lim]
+    else:
+        S = seq
 
-    S = seq[:150]
     starttime = timeit.default_timer()
+
     W, V, WM = zuker(S)
-    print(W[0][len(S)-1], timeit.default_timer() - starttime)
-
-    # structure = backtrace(0, len(S)-1, W, V, WM, 0)
-    # print(structure)
-
-    # dbn_file = sys.argv[1]
-    # dbn = "((..))"
-    # rna = "AAGATT"
-    # dbn_output("test",dbn,rna,dbn_file)
-
+    print("Minimum energy score:",W[0][len(S)-1],"\nTime:", timeit.default_timer() - starttime)
+    dbn = "-" * len(S)
+    dbn = backtrace(0, len(S)-1, W, V, WM, 0,dbn,S)
+    dbn_output("test",dbn,S,dbnf)
 
 if __name__ == "__main__":
-    main()
+    # fasta_file = sys.argv[1]
+    # dbn_file = sys.argv[2]
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-f", "--fasta", help="fasta file", required=True)
+    parser.add_argument("-d", "--dbn", help="dbn file", required=True)
+    parser.add_argument("-l", "--limit", help="limit length of sequence", default=-1, type=int)
+    args = parser.parse_args()
+    fasta_file = args.fasta
+    dbn_file = args.dbn
+    limit = args.limit
+    main(fasta_file,dbn_file,limit)

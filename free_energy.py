@@ -71,7 +71,6 @@ def eL(i, j, ip, jp, S):
 
         if (closing_int not in stacking_energies or closing_ext not in stacking_energies):
             return float('inf')
-        
         return (bulge_loop_energies[size] + stacking_energies[closing_ext][closing_int])/10.0
     else:
         # INTERNAL
@@ -80,7 +79,6 @@ def eL(i, j, ip, jp, S):
         
         if (closing not in interior_loop_energies):
             return float('inf')
-
         return interior_loop_energies[closing][size]/10.0
 
 
