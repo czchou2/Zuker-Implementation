@@ -131,8 +131,8 @@ def backtrace(i, j, W, V, WM, x,dbn,S):
                 dbn = backtrace(i+1, j-1, W, V, WM, 1,dbn,S)
             else:
                 score, ip, jp = min([(V[ip][jp] + eL(i, j, ip, jp, S), ip, jp)
-                       for ip in range(i+1, j)
-                       for jp in range(ip+1, j)])
+                       for ip in range(i+1, min(j,i+34))
+                       for jp in range(max(ip+1,j-34), j)])
                 if V[i][j] == score:
                     # interior loop or bulge
                     dbn = dbn[:i] + "(" + dbn[i+1:j] + ")" + dbn[j+1:]
