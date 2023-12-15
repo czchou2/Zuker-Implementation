@@ -9,5 +9,5 @@ Implementation of Zuker's algorithm in Python.
     
     b. DBN: file name of dbn file to output
     
-    c. LIMIT (optional): limit the length of the sequence (The algorithm is not recommended for large inputs. Recommended to be in the low hundreds.).
+    c. LIMIT (optional): limit the length of the sequence (The algorithm is not recommended for large inputs. Inputs over 1000 will take a while. Ex: a sequence of length >1400 took roughly 17 minutes when tested on a personal laptop).
 5. Can run `python3 zuker.py --help` to see usage.
