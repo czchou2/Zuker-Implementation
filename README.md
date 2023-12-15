@@ -11,3 +11,5 @@ Implementation of Zuker's algorithm in Python.
     
     c. LIMIT (optional): limit the length of the sequence (The algorithm is not recommended for large inputs. Inputs over 1000 will take a while. Ex: a sequence of length >1400 took roughly 17 minutes when tested on a personal laptop).
 5. Can run `python3 zuker.py --help` to see usage.
+6. Algorithm will print the energy of the structure calculated as well as the time the algorithm took in seconds.
+7. The algorithm outputs the structure to the dbn file chosen.
