@@ -47,5 +47,6 @@ def relaxed_base_pair(S1,S2,t):
     return minm
 
 if __name__ == "__main__":
+    # t = 0 corresponds to regular base pair, increase to relax it
     rbp = relaxed_base_pair("(((...(.((()))..)..).))","((...(.().().)...))()()",0)
     print(rbp)
