@@ -39,8 +39,10 @@ def zuker(S):
     n = len(S)
 
     a = 0  # energy contribution for closing of loop
-    b = 0 # energy contribution for paired base (secondary structure) in multiloop
-    c = 0 # energy contribution for unpaired base in multiloop
+    b = 0  # energy contribution for paired base (secondary structure) in multiloop
+    c = 0  # energy contribution for unpaired base in multiloop
+
+    m = 3  # minimal loop size
 
     # initialization (for j - i <= m, W(i,j)=0, V(i,j)=inf, WM(i,j)=inf):
 
